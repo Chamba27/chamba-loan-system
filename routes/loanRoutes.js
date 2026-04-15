@@ -1,10 +1,16 @@
-// This file defines all the routes (endpoints) for our loan API
-// It also contains special Swagger comments that generate our documentation
-// These special comments start with /** and are called JSDoc comments
+// This file defines all routes for our loan API
+// It also contains Swagger documentation comments for each endpoint
 
 const express = require('express');
 const router = express.Router();
-const { applyForLoan } = require('../controllers/loanController');
+
+// Import all four controller functions
+const {
+  applyForLoan,
+  getAllLoans,
+  getLoanById,
+  getLoansByNationalId,
+} = require('../controllers/loanController');
 
 /**
  * @swagger
@@ -19,34 +25,13 @@ const { applyForLoan } = require('../controllers/loanController');
  *       properties:
  *         nationalId:
  *           type: string
- *           description: The applicant's national ID
  *           example: NAT001
  *         loanAmount:
  *           type: number
- *           description: The amount of loan requested in MK
  *           example: 500000
  *         termMonths:
  *           type: number
- *           description: The loan repayment period in months
  *           example: 12
- *     LoanDecision:
- *       type: object
- *       properties:
- *         success:
- *           type: boolean
- *           example: true
- *         decision:
- *           type: object
- *           properties:
- *             approved:
- *               type: boolean
- *               example: true
- *             message:
- *               type: string
- *               example: Congratulations! Your loan application has been approved
- *             monthlyRepayment:
- *               type: string
- *               example: "41666.67"
  */
 
 /**
@@ -55,11 +40,9 @@ const { applyForLoan } = require('../controllers/loanController');
  *   post:
  *     summary: Apply for a loan
  *     description: >
- *       Checks loan eligibility based on the following rules -
- *       Credit score must be 600 or above,
- *       Monthly salary must be at least 3x the monthly repayment,
- *       No active defaults,
- *       Maximum 3 active loans.
+ *       Checks loan eligibility based on salary and credit history.
+ *       Rules - Credit score must be 600+, Salary must be 3x monthly repayment,
+ *       No active defaults, Maximum 3 active loans.
  *     tags:
  *       - Loans
  *     requestBody:
@@ -71,27 +54,77 @@ const { applyForLoan } = require('../controllers/loanController');
  *     responses:
  *       200:
  *         description: Loan decision returned successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/LoanDecision'
  *       400:
  *         description: Missing or invalid fields
- *         content:
- *           application/json:
- *             example:
- *               success: false
- *               error: Please provide nationalId, loanAmount and termMonths
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             example:
- *               success: false
- *               error: Something went wrong. Please try again later.
  */
-
-// POST /api/loans/apply - handles loan applications
 router.post('/apply', applyForLoan);
+
+/**
+ * @swagger
+ * /api/loans:
+ *   get:
+ *     summary: Get all loan applications
+ *     description: Returns all loan applications stored in the database, newest first
+ *     tags:
+ *       - Loans
+ *     responses:
+ *       200:
+ *         description: List of all loan applications
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/', getAllLoans);
+
+/**
+ * @swagger
+ * /api/loans/{id}:
+ *   get:
+ *     summary: Get a loan by ID
+ *     description: Returns one specific loan application by its MongoDB ID
+ *     tags:
+ *       - Loans
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The MongoDB ID of the loan application
+ *         schema:
+ *           type: string
+ *           example: 507f1f77bcf86cd799439011
+ *     responses:
+ *       200:
+ *         description: Loan application found
+ *       404:
+ *         description: Loan application not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/:id', getLoanById);
+
+/**
+ * @swagger
+ * /api/loans/applicant/{nationalId}:
+ *   get:
+ *     summary: Get all loans for a specific applicant
+ *     description: Returns all loan applications for one person by their national ID
+ *     tags:
+ *       - Loans
+ *     parameters:
+ *       - in: path
+ *         name: nationalId
+ *         required: true
+ *         description: The national ID of the applicant
+ *         schema:
+ *           type: string
+ *           example: NAT001
+ *     responses:
+ *       200:
+ *         description: List of loans for this applicant
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/applicant/:nationalId', getLoansByNationalId);
 
 module.exports = router;

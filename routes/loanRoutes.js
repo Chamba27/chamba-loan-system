@@ -3,6 +3,8 @@
 
 const express = require('express');
 const router = express.Router();
+// Import auth middleware to protect our routes
+const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // Import all four controller functions
 const {
@@ -39,6 +41,8 @@ const {
  * /api/loans/apply:
  *   post:
  *     summary: Apply for a loan
+ *     security:
+ *       - bearerAuth: []
  *     description: >
  *       Checks loan eligibility based on salary and credit history.
  *       Rules - Credit score must be 600+, Salary must be 3x monthly repayment,
@@ -59,13 +63,16 @@ const {
  *       500:
  *         description: Internal server error
  */
-router.post('/apply', applyForLoan);
+// POST /apply - must be logged in to apply
+router.post('/apply', protect, applyForLoan);
 
 /**
  * @swagger
  * /api/loans:
  *   get:
  *     summary: Get all loan applications
+ *     security:
+ *       - bearerAuth: []
  *     description: Returns all loan applications stored in the database, newest first
  *     tags:
  *       - Loans
@@ -75,7 +82,8 @@ router.post('/apply', applyForLoan);
  *       500:
  *         description: Internal server error
  */
-router.get('/', getAllLoans);
+// GET / - admin only - sees ALL applications
+router.get('/', protect, adminOnly, getAllLoans);
 
 /**
  * @swagger
@@ -101,7 +109,8 @@ router.get('/', getAllLoans);
  *       500:
  *         description: Internal server error
  */
-router.get('/:id', getLoanById);
+// GET /:id - must be logged in
+router.get('/:id', protect, getLoanById);
 
 /**
  * @swagger
@@ -125,6 +134,7 @@ router.get('/:id', getLoanById);
  *       500:
  *         description: Internal server error
  */
-router.get('/applicant/:nationalId', getLoansByNationalId);
+// GET /applicant/:nationalId - must be logged in
+router.get('/applicant/:nationalId', protect, getLoansByNationalId);
 
 module.exports = router;

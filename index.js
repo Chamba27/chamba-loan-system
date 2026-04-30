@@ -19,6 +19,8 @@ const connectDB = require('./config/db');
 
 // Import our loan routes
 const loanRoutes = require('./routes/loanRoutes');
+// Import auth routes
+const authRoutes = require('./routes/authRoutes');
 
 // Create our Express applicatio
 const app = express();
@@ -39,6 +41,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ── Register our routes ────────────────────────────────────────
 app.use('/api/loans', loanRoutes);
+// Register auth routes
+
+// Any request starting with /api/auth goes to authRoutes
+app.use('/api/auth', authRoutes);
 
 // Welcome endpoint
 app.get('/', (req, res) => {

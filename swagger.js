@@ -1,39 +1,41 @@
-// This file configures Swagger - our API documentation tool
-// Swagger reads this configuration and generates a beautiful
-// interactive webpage where developers can see and test all endpoints
-
+// This file configures Swagger documentation
 const swaggerJsdoc = require('swagger-jsdoc');
 
-// This is the main Swagger configuration object
 const options = {
   definition: {
-    openapi: '3.0.0', // The version of OpenAPI standard we're using
+    openapi: '3.0.0',
     info: {
-      title: 'Chamba Loan Eligibility API', // Name shown at top of docs
-      version: '1.0.0',                     // Your API version
-      description:
-        'An API that checks loan eligibility based on salary and credit history. ' +
-        'Built with Express.js by Chamba Inc.',
+      title:       'Chamba Loan Eligibility API',
+      version:     '1.0.0',
+      description: 'A loan eligibility system built with Express.js, MongoDB and JWT Authentication',
       contact: {
-        name: 'Chamba Inc',
+        name:  'Chamba Inc',
         email: 'support@chamba.com',
       },
     },
     servers: [
       {
-        // This tells Swagger where your API is running
-        url: 'http://localhost:5000',
+        url:         'http://localhost:5000',
         description: 'Development server',
       },
     ],
+    // This adds the Authorization input to Swagger UI
+    // So we can test protected endpoints directly from the docs
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type:         'http',
+          scheme:       'bearer',
+          bearerFormat: 'JWT',
+          description:  'Enter your JWT token here. Get it from /api/auth/login'
+        }
+      }
+    }
   },
-  // This tells Swagger where to find our endpoint documentation comments
-  // It will scan our routes file for special comments called JSDoc comments
+  // Scan both routes files for Swagger comments
   apis: ['./routes/*.js'],
 };
 
-// Generate the Swagger specification from our options
 const swaggerSpec = swaggerJsdoc(options);
 
-// Export so index.js can use it
 module.exports = swaggerSpec;

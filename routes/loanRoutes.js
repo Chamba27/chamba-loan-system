@@ -90,6 +90,8 @@ router.get('/', protect, adminOnly, getAllLoans);
  * /api/loans/{id}:
  *   get:
  *     summary: Get a loan by ID
+ *     security:
+ *       - bearerAuth: []
  *     description: Returns one specific loan application by its MongoDB ID
  *     tags:
  *       - Loans
@@ -117,6 +119,8 @@ router.get('/:id', protect, getLoanById);
  * /api/loans/applicant/{nationalId}:
  *   get:
  *     summary: Get all loans for a specific applicant
+ *     security:
+ *       - bearerAuth: []
  *     description: Returns all loan applications for one person by their national ID
  *     tags:
  *       - Loans

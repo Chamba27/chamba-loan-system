@@ -5,11 +5,16 @@
 const express = require('express');
 const router = express.Router();
 
-// Import auth controller functions
+// Import passport for Google Sign In
+const passport = require('passport');
+
+// Import google callback functions
 const {
   register,
   login,
   getMe,
+  googleCallback,
+  googleAuthFailed,
 } = require('../controllers/authController');
 
 // Import auth middleware
@@ -161,5 +166,37 @@ router.post('/login', login);
  *         description: Internal server error
  */
 router.get('/me', protect, getMe);
+
+
+/**
+ * @swagger
+ * /api/auth/google:
+ *   get:
+ *     summary: Sign in with Google
+ *     description: Redirects to Google login page
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       302:
+ *         description: Redirects to Google OAuth page
+ */
+// This route redirects user to Google login page
+router.get(
+  '/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'] // we want name and email from Google
+  })
+);
+
+// This route handles the callback from Google
+// Google redirects here after user logs in
+router.get(
+  '/google/callback',
+  passport.authenticate('google', { failureRedirect: '/api/auth/google/failed' }),
+  googleCallback
+);
+
+// This route handles failed Google login
+router.get('/google/failed', googleAuthFailed);
 
 module.exports = router;

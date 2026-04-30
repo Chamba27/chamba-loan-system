@@ -202,9 +202,47 @@ const getMe = async (req, res) => {
   }
 };
 
+// ── GOOGLE AUTH CALLBACK ───────────────────────────────────────
+// This runs after Google verifies the user
+// Passport has already found or created the user
+// We just need to generate a JWT token and redirect to frontend
+const googleCallback = async (req, res) => {
+  try {
+
+    // req.user is set by Passport after successful Google login
+    const user = req.user;
+
+    // Generate JWT token for this user
+    const token = generateToken(user._id, user.role);
+
+    // Redirect to frontend with token in URL
+    // Frontend will extract the token and store it
+    res.redirect(
+      `${process.env.CLIENT_URL}/auth/google/success?token=${token}&role=${user.role}`
+    );
+
+  } catch (error) {
+    console.error('Google callback error:', error);
+    res.redirect(`${process.env.CLIENT_URL}/auth/google/failed`);
+  }
+};
+
+// ── GOOGLE AUTH FAILURE ───────────────────────────────────────
+// This runs if Google login fails for any reason
+const googleAuthFailed = (req, res) => {
+  return res.status(401).json({
+    success: false,
+    error: 'Google authentication failed. Please try again.'
+  });
+};
+
+
+
 // Export all functions
 module.exports = {
   register,
   login,
   getMe,
+  googleCallback,
+  googleAuthFailed,
 };

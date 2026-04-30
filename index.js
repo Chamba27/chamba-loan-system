@@ -1,8 +1,12 @@
 // Import dotenv first - before anything else!
 // This loads our .env file so process.env variables are available
+
+const session = require('express-session');
+
 require('dotenv').config();
 
-
+// Import passport for Google Sign In
+const passport = require('./config/passport');
 
 // Import Express
 const express = require('express');
@@ -32,6 +36,31 @@ connectDB();
 
 // Tell Express to understand JSON data
 app.use(express.json());
+
+
+// Session middleware - required by Passport for Google Sign In
+// This creates a session for each user visit
+app.use(session({
+  // Secret used to sign the session cookie
+  secret: process.env.JWT_SECRET,
+  // Don't save session if nothing changed
+  resave: false,
+  // Don't create session until something is stored
+  saveUninitialized: false,
+  cookie: {
+    // Session expires after 1 day
+    maxAge: 24 * 60 * 60 * 1000
+  }
+}));
+
+// Initialize passport middleware
+app.use(passport.initialize());
+
+// Allow passport to use sessions
+app.use(passport.session());
+
+// Initialize passport middleware
+app.use(passport.initialize());
 
 // Turn on CORS
 app.use(cors());

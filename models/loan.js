@@ -7,6 +7,15 @@ const mongoose = require('mongoose');
 // STEP 1: Define the Schema - the rules for our loan data
 const loanSchema = new mongoose.Schema(
   {
+
+    // Reference to the User who applied for this loan
+    // Links the loan to a specific user account
+    userId: {
+      type:     mongoose.Schema.Types.ObjectId,
+      ref:      'User',
+      required: false, // false for old loans that don't have userId
+    },
+
     // The applicant's national ID
     nationalId: {
       type: String,      // must be text

@@ -17,6 +17,7 @@ const loanRoutes = require('./routes/loanRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const repaymentRoutes = require('./routes/repaymentRoutes');
 
 // ── STEP 5: Create Express app ────────────────────────────────
 const app = express();
@@ -53,6 +54,7 @@ app.use('/api/auth',  authRoutes);
 app.use('/api/loans', loanRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/repayments', repaymentRoutes);
 
 // ── STEP 10: Welcome endpoint ─────────────────────────────────
 app.get('/', (req, res) => {

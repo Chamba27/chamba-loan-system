@@ -50,16 +50,15 @@ const generateRepaymentSchedule = async (req, res) => {
       dueDate.setMonth(dueDate.getMonth() + i);
 
       repayments.push({
-      loanId:             loan._id,
-      // Use loan's userId if available, otherwise use logged in user's ID
-      userId:             loan.userId || req.user.userId,
-      amount:             loan.monthlyRepayment,
-      installmentNumber:  i,
-      totalInstallments:  loan.termMonths,
-      dueDate,
-      status:             'pending',
-});
-
+        loanId:            loan._id,
+        // Use loan's userId if available otherwise use logged in user's ID
+        userId:            loan.userId || req.user.userId,
+        amount:            loan.monthlyRepayment,
+        installmentNumber: i,
+        totalInstallments: loan.termMonths,
+        dueDate,
+        status:            'pending',
+      });
     }
 
     // Save all repayments to MongoDB at once
@@ -67,8 +66,8 @@ const generateRepaymentSchedule = async (req, res) => {
     const savedRepayments = await Repayment.insertMany(repayments);
 
     return res.status(201).json({
-      success: true,
-      message: `Generated ${loan.termMonths} repayment installments`,
+      success:     true,
+      message:     `Generated ${loan.termMonths} repayment installments`,
       totalAmount: loan.monthlyRepayment * loan.termMonths,
       repayments:  savedRepayments,
     });
@@ -90,7 +89,7 @@ const getMyRepayments = async (req, res) => {
 
     const repayments = await Repayment.find({ userId: req.user.userId })
       .populate('loanId', 'loanAmount termMonths nationalId')
-      .sort({ dueDate: 1 }); // sort by due date ascending
+      .sort({ dueDate: 1 });
 
     // Calculate summary stats
     const totalPaid    = repayments.filter(r => r.status === 'paid').length;
@@ -175,7 +174,7 @@ const initiatePayment = async (req, res) => {
 
     const { repaymentId } = req.body;
 
-    // Find the repayment
+    // Find the repayment and populate user and loan details
     const repayment = await Repayment.findById(repaymentId)
       .populate('loanId')
       .populate('userId', 'fullName email phone');
@@ -195,22 +194,29 @@ const initiatePayment = async (req, res) => {
       });
     }
 
-    // Generate a unique payment reference
-    const paymentReference = `CHAMBA-${repayment._id}-${Date.now()}`;
+    // Split full name into first and last name
+    // Paychangu requires them separately
+    const nameParts = repayment.userId.fullName.split(' ');
+    const firstName = nameParts[0];
+    const lastName  = nameParts.slice(1).join(' ') || nameParts[0];
 
-    // Paychangu payment payload
-    // This is what we send to Paychangu API
+    // Generate unique transaction reference
+    // tx_ref must be unique for every transaction
+    const txRef = `CHAMBA-${repayment._id}-${Date.now()}`;
+
+    // Paychangu payment payload - correct format from their docs
     const paychanguPayload = {
-      amount:           repayment.amount,
-      currency:         'MWK',
-      reference:        paymentReference,
-      callback_url:     `${process.env.API_URL}/api/repayments/webhook`,
-      return_url:       `${process.env.CLIENT_URL}/repayments/success`,
-      cancel_url:       `${process.env.CLIENT_URL}/repayments/cancel`,
-      customer: {
-        name:  repayment.userId.fullName,
-        email: repayment.userId.email,
-        phone: repayment.userId.phone,
+      amount:       repayment.amount,
+      currency:     'MWK',
+      email:        repayment.userId.email,
+      first_name:   firstName,
+      last_name:    lastName,
+      callback_url: `${process.env.API_URL}/api/repayments/webhook`,
+      return_url:   `${process.env.CLIENT_URL}/repayments/cancel`,
+      tx_ref:       txRef,
+      customization: {
+        title:       'Chamba Loan Repayment',
+        description: `Installment ${repayment.installmentNumber} of ${repayment.totalInstallments}`,
       },
       meta: {
         repaymentId: repayment._id.toString(),
@@ -224,6 +230,7 @@ const initiatePayment = async (req, res) => {
       {
         method:  'POST',
         headers: {
+          'Accept':        'application/json',
           'Content-Type':  'application/json',
           'Authorization': `Bearer ${process.env.PAYCHANGU_SECRET_KEY}`,
         },
@@ -243,15 +250,14 @@ const initiatePayment = async (req, res) => {
     }
 
     // Update repayment with payment reference
-    repayment.paymentReference = paymentReference;
+    repayment.paymentReference = txRef;
     await repayment.save();
 
     return res.status(200).json({
       success:          true,
       message:          'Payment initiated successfully',
-      paymentReference,
-      // Send the Paychangu checkout URL to frontend
-      // Frontend redirects user to this URL to complete payment
+      paymentReference: txRef,
+      // Paychangu returns checkout_url inside data object
       checkoutUrl:      paychanguData.data?.checkout_url,
     });
 
@@ -267,15 +273,15 @@ const initiatePayment = async (req, res) => {
 // ── PAYCHANGU WEBHOOK ─────────────────────────────────────────
 // Handles POST /api/repayments/webhook
 // Paychangu calls this endpoint after payment is completed
-// This is NOT called by our frontend - it's called by Paychangu servers!
+// This is NOT called by our frontend - called by Paychangu servers!
 const paychanguWebhook = async (req, res) => {
   try {
 
-    const { reference, status, transaction_id, payment_method } = req.body;
+    const { tx_ref, status, transaction_id, payment_method } = req.body;
 
     // Find the repayment by payment reference
     const repayment = await Repayment.findOne({
-      paymentReference: reference
+      paymentReference: tx_ref
     });
 
     if (!repayment) {

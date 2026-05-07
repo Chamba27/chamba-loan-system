@@ -4,6 +4,12 @@
 const Repayment = require('../models/Repayment');
 const Loan = require('../models/Loan');
 
+// Import email service
+const { sendPaymentReceivedEmail } = require('../utils/emailService');
+
+// Import User model
+const User = require('../models/User');
+
 // ── GENERATE REPAYMENT SCHEDULE ───────────────────────────────
 // Handles POST /api/repayments/generate/:loanId
 // Generates monthly repayment schedule when loan is approved
@@ -292,15 +298,22 @@ const paychanguWebhook = async (req, res) => {
     }
 
     // Update repayment based on Paychangu status
-    if (status === 'success') {
-      repayment.status        = 'paid';
-      repayment.paidDate      = new Date();
-      repayment.transactionId = transaction_id;
-      repayment.paymentMethod = payment_method;
-      await repayment.save();
+  if (status === 'success') {
+  repayment.status        = 'paid';
+  repayment.paidDate      = new Date();
+  repayment.transactionId = transaction_id;
+  repayment.paymentMethod = payment_method;
+  await repayment.save();
 
-      console.log(`Payment successful for repayment ${repayment._id}`);
-    }
+  // Send payment confirmation email
+  const user = await User.findById(repayment.userId);
+  if (user) {
+    sendPaymentReceivedEmail(user, repayment)
+      .catch(err => console.error('Payment email failed:', err));
+  }
+
+  console.log(`Payment successful for repayment ${repayment._id}`);
+}
 
     // Always return 200 to Paychangu
     // If we return an error Paychangu will keep retrying!

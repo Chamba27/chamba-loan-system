@@ -8,6 +8,16 @@ const { checkLoanEligibility } = require('../services/loanService');
 // Import our Loan Model - this is how we talk to MongoDB
 const Loan = require('../models/Loan');
 
+// Import User model to fetch user details for email
+const User = require('../models/User');
+
+// Import email service
+// Note: function names must match exactly what emailService.js exports!
+const {
+  sendLoanApprovedEmail,
+  sendLoanDeclinedEmail
+} = require('../utils/emailService');
+
 // This function handles POST /api/loans/apply
 const applyForLoan = async (req, res) => {
   try {
@@ -30,7 +40,11 @@ const applyForLoan = async (req, res) => {
       });
     }
 
-    // STEP 3: Call the loan eligibility service
+    // STEP 3: Get the logged in user's ID from the JWT token
+    // req.user was set by our protect middleware
+    const userId = req.user.userId;
+
+    // STEP 4: Call the loan eligibility service
     // This checks salary and credit and applies the rules
     const decision = await checkLoanEligibility(
       nationalId,
@@ -38,9 +52,9 @@ const applyForLoan = async (req, res) => {
       parseInt(termMonths)
     );
 
-    // STEP 4: Save the application and decision to MongoDB
-    // We create a new Loan document using our Model blueprint
+    // STEP 5: Save the application and decision to MongoDB
     const loanApplication = new Loan({
+      userId,           // link loan to logged in user
       nationalId,
       loanAmount:       parseFloat(loanAmount),
       termMonths:       parseInt(termMonths),
@@ -52,10 +66,33 @@ const applyForLoan = async (req, res) => {
     });
 
     // .save() actually writes the document to MongoDB
-    // We await it because saving to DB takes a moment
     const savedApplication = await loanApplication.save();
 
-    // STEP 5: Send the response back with the decision and saved ID
+    // STEP 6: Send email notification
+    // Fetch user details for the email
+    const user = await User.findById(userId);
+
+    if (user) {
+      if (decision.approved) {
+        // Send approval email
+        sendLoanApprovedEmail(user, {
+          loanAmount:       parseFloat(loanAmount),
+          termMonths:       parseInt(termMonths),
+          monthlyRepayment: parseFloat(decision.monthlyRepayment),
+        }).catch(err => console.error('Loan approved email failed:', err));
+      } else {
+        // Send decline email with reasons
+        const declineReasons = decision.reasons || 
+        (decision.reason ? [decision.reason] : ['Application could not be processed']);
+
+        sendLoanDeclinedEmail(user, {
+          loanAmount: parseFloat(loanAmount),
+        }, declineReasons)
+        .catch(err => console.error('Loan declined email failed:', err));
+      }
+    }
+
+    // STEP 7: Send the response back with the decision and saved ID
     return res.status(200).json({
       success:       true,
       applicationId: savedApplication._id,
@@ -76,9 +113,6 @@ const applyForLoan = async (req, res) => {
 const getAllLoans = async (req, res) => {
   try {
 
-    // .find() with no arguments returns ALL documents in the collection
-    // sort({ createdAt: -1 }) means newest first
-    // -1 = descending (newest first), 1 = ascending (oldest first)
     const loans = await Loan.find().sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -101,11 +135,8 @@ const getAllLoans = async (req, res) => {
 const getLoanById = async (req, res) => {
   try {
 
-    // req.params.id gets the ID from the URL
-    // e.g. /api/loans/507f1f77bcf86cd799439011
     const loan = await Loan.findById(req.params.id);
 
-    // If no loan found with that ID return 404
     if (!loan) {
       return res.status(404).json({
         success: false,
@@ -132,7 +163,6 @@ const getLoanById = async (req, res) => {
 const getLoansByNationalId = async (req, res) => {
   try {
 
-    // Find all loans where nationalId matches the URL parameter
     const loans = await Loan.find({
       nationalId: req.params.nationalId
     }).sort({ createdAt: -1 });
@@ -152,25 +182,10 @@ const getLoansByNationalId = async (req, res) => {
   }
 };
 
-// Export all four functions so our routes file can use them
+// Export all four functions
 module.exports = {
   applyForLoan,
   getAllLoans,
   getLoanById,
   getLoansByNationalId,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -5,6 +5,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const {sendWelcomeEmail} = require('../utils/emailService');
 
 // ── HELPER FUNCTION ───────────────────────────────────────────
 // Generates a JWT token for a user
@@ -70,6 +71,11 @@ const register = async (req, res) => {
     // STEP 6: Generate JWT token for the new user
     const token = generateToken(user._id, user.role);
 
+    // We don't await this - if email fails we don't want to block the response
+    sendWelcomeEmail(user).catch(err => 
+      console.error('Welcome email failed:', err)
+    );
+
     // STEP 7: Send response with token and user details
     return res.status(201).json({
       success: true,
@@ -84,6 +90,8 @@ const register = async (req, res) => {
         role:       user.role,
       }
     });
+
+    
 
   } catch (error) {
     console.error('Registration error:', error);

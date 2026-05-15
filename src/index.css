@@ -1,0 +1,34 @@
+/* Google Fonts must come FIRST before everything else */
+@import url('https://fonts.googleapis.com/css2?family=Radio+Canada:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* Then Tailwind */
+@import "tailwindcss";
+
+/* Then your custom theme */
+@theme {
+  --color-primary: #E4F222;
+  --color-secondary: #000000;
+  --color-cream: #FCFFD4;
+  --font-heading: 'Radio Canada', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Radio Canada', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}

@@ -12,6 +12,7 @@ const passport = require('passport');
 const {
   register,
   login,
+  verifyOTP,
   getMe,
   googleCallback,
   googleAuthFailed,
@@ -144,6 +145,44 @@ router.post('/register', register);
  *         description: Internal server error
  */
 router.post('/login', login);
+
+/**
+ * @swagger
+ * /api/auth/verify-otp:
+ *   post:
+ *     summary: Verify OTP code
+ *     description: >
+ *       Verifies the OTP sent to email after login.
+ *       Returns JWT token if OTP is correct.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - otp
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: 507f1f77bcf86cd799439011
+ *               otp:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: OTP verified - token returned
+ *       400:
+ *         description: Invalid or expired OTP
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/verify-otp', verifyOTP);
 
 /**
  * @swagger

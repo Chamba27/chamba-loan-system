@@ -2,10 +2,12 @@
 // Registration, Login, Google Sign In, and getting current user
 // Think of it as the security desk of our building
 
+const { sendWelcomeEmail, sendOTPEmail } = require('../utils/emailService');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const {sendWelcomeEmail} = require('../utils/emailService');
+
+
 
 // ── HELPER FUNCTION ───────────────────────────────────────────
 // Generates a JWT token for a user
@@ -104,14 +106,12 @@ const register = async (req, res) => {
 
 // ── LOGIN ─────────────────────────────────────────────────────
 // Handles POST /api/auth/login
-// Logs in an existing user
+// Now sends OTP instead of returning token directly
 const login = async (req, res) => {
   try {
 
-    // STEP 1: Extract email and password
     const { email, password } = req.body;
 
-    // STEP 2: Validate fields
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -119,12 +119,9 @@ const login = async (req, res) => {
       });
     }
 
-    // STEP 3: Find user by email
-    // .select('+password') includes password field
-    // We excluded it by default for security
+    // Find user by email
     const user = await User.findOne({ email });
 
-    // STEP 4: Check if user exists
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -132,8 +129,7 @@ const login = async (req, res) => {
       });
     }
 
-    // STEP 5: Check if password matches
-    // Uses our custom matchPassword method from User model
+    // Check password
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -142,13 +138,106 @@ const login = async (req, res) => {
       });
     }
 
-    // STEP 6: Generate JWT token
+    // Generate 6 digit OTP
+    // Math.random gives a number like 0.123456
+    // * 900000 + 100000 ensures it's always 6 digits
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // OTP expires in 10 minutes
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    // Save OTP to user document
+    user.otp = {
+      code:      otpCode,
+      expiresAt: otpExpiry,
+      verified:  false,
+    };
+    await user.save();
+
+    // Send OTP email
+    await sendOTPEmail(user, otpCode);
+
+    // Return userId so frontend knows who to verify
+    // We don't return the token yet!
+    return res.status(200).json({
+      success:  true,
+      message:  'OTP sent to your email. Please verify to continue.',
+      userId:   user._id,
+      email:    user.email,
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Something went wrong. Please try again later.'
+    });
+  }
+};
+
+// ── VERIFY OTP ────────────────────────────────────────────────
+// Handles POST /api/auth/verify-otp
+// Verifies the OTP and returns JWT token if correct
+const verifyOTP = async (req, res) => {
+  try {
+
+    const { userId, otp } = req.body;
+
+    if (!userId || !otp) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide userId and OTP'
+      });
+    }
+
+    // Find the user
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Check if OTP exists
+    if (!user.otp.code) {
+      return res.status(400).json({
+        success: false,
+        error: 'No OTP found. Please login again.'
+      });
+    }
+
+    // Check if OTP is expired
+    if (new Date() > user.otp.expiresAt) {
+      return res.status(400).json({
+        success: false,
+        error: 'OTP has expired. Please login again.'
+      });
+    }
+
+    // Check if OTP matches
+    if (user.otp.code !== otp) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid OTP. Please try again.'
+      });
+    }
+
+    // OTP is correct! Clear it so it can't be reused
+    user.otp = {
+      code:      null,
+      expiresAt: null,
+      verified:  true,
+    };
+    await user.save();
+
+    // Now generate the real JWT token
     const token = generateToken(user._id, user.role);
 
-    // STEP 7: Send response
     return res.status(200).json({
       success: true,
-      message: 'Logged in successfully',
+      message: 'OTP verified successfully!',
       token,
       user: {
         id:         user._id,
@@ -161,13 +250,14 @@ const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('OTP verification error:', error);
     return res.status(500).json({
       success: false,
       error: 'Something went wrong. Please try again later.'
     });
   }
 };
+
 
 // ── GET CURRENT USER ──────────────────────────────────────────
 // Handles GET /api/auth/me
@@ -250,6 +340,7 @@ const googleAuthFailed = (req, res) => {
 module.exports = {
   register,
   login,
+  verifyOTP,
   getMe,
   googleCallback,
   googleAuthFailed,

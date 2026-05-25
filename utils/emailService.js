@@ -235,6 +235,35 @@ const sendPaymentReminderEmail = async (user, repayment) => {
   return sendEmail(user.email, subject, html);
 };
 
+// ── OTP EMAIL ─────────────────────────────────────────────────
+// Sent when user logs in - contains 6 digit OTP code
+const sendOTPEmail = async (user, otp) => {
+  const subject = '🔐 Your Login Verification Code';
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: #000; padding: 30px; text-align: center;">
+        <h1 style="color: #E4F222; margin: 0;">CHAMBA</h1>
+        <p style="color: #fff; margin: 5px 0;">Loan Management System</p>
+      </div>
+      <div style="padding: 30px; background: #f9f9f9;">
+        <h2 style="color: #000;">Verification Code 🔐</h2>
+        <p>Hi <strong>${user.fullName}</strong>,</p>
+        <p>Use the code below to complete your login:</p>
+        <div style="background: #000; color: #E4F222; font-size: 40px; font-weight: 900;
+                    letter-spacing: 12px; text-align: center; padding: 24px;
+                    border-radius: 12px; margin: 24px 0;">
+          ${otp}
+        </div>
+        <p style="color: #888; font-size: 13px;">
+          This code expires in <strong>10 minutes.</strong>
+          If you did not request this, please ignore this email.
+        </p>
+      </div>
+    </div>
+  `;
+  return sendEmail(user.email, subject, html);
+};
+
 // Export all email functions
 module.exports = {
   sendWelcomeEmail,
@@ -242,4 +271,5 @@ module.exports = {
   sendLoanDeclinedEmail,
   sendPaymentReceivedEmail,
   sendPaymentReminderEmail,
+  sendOTPEmail,
 };

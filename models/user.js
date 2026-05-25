@@ -75,11 +75,19 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
+    otp: {
+    code:      { type: String, default: null },
+    expiresAt: { type: Date,   default: null },
+    verified:  { type: Boolean, default: false },
+  },
+
   },
   {
     // Automatically adds createdAt and updatedAt
     timestamps: true,
   }
+
+
 );
 
 
@@ -100,6 +108,8 @@ userSchema.pre('save', async function() {
 
   // Hash the password with the salt
   this.password = await bcrypt.hash(this.password, salt);
+  
+  
 });
 
 // ── METHODS ───────────────────────────────────────────────────

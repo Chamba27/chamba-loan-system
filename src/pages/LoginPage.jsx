@@ -38,36 +38,30 @@ const LoginPage = () => {
 
   // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Basic validation
-    if (!email || !password) {
-      toast.error('Please fill in all fields');
-      return;
-    }
+  if (!email || !password) {
+    toast.error('Please fill in all fields');
+    return;
+  }
 
-    setLoading(true);
-    try {
-      // Call login from AuthContext
-      const user = await login(email, password);
+  setLoading(true);
+  try {
+    // Login now returns userId not token
+    await login(email, password);
 
-      toast.success('Welcome back!');
+    toast.success('OTP sent to your email!');
 
-      // Redirect based on role
-      if (user.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+    // Redirect to OTP verification page
+    navigate('/verify-otp');
 
-    } catch (error) {
-      // Show error from API
-      const message = error.response?.data?.error || 'Login failed. Please try again.';
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    const message = error.response?.data?.error || 'Login failed. Please try again.';
+    toast.error(message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <AuthLayout title="Sign In">

@@ -54,19 +54,13 @@ api.interceptors.response.use(
 );
 
 // ── AUTH ENDPOINTS ────────────────────────────────────────────
-export const authAPI = {
-  // Register a new user
-  register: (data) => api.post('/auth/register', data),
-
-  // Login with email and password
-  login: (data) => api.post('/auth/login', data),
-
-  // Get current logged in user
-  getMe: () => api.get('/auth/me'),
-
-  // Google Sign In URL
-  googleAuth: () => window.location.href = 'http://localhost:5000/api/auth/google',
-};
+  export const authAPI = {
+    register:   (data) => api.post('/auth/register', data),
+    login:      (data) => api.post('/auth/login', data),
+    verifyOTP:  (data) => api.post('/auth/verify-otp', data),
+    getMe:      () => api.get('/auth/me'),
+    googleAuth: () => window.location.href = 'http://localhost:5000/api/auth/google',
+  };
 
 // ── LOAN ENDPOINTS ────────────────────────────────────────────
 export const loanAPI = {
@@ -127,5 +121,7 @@ export const repaymentAPI = {
   // Get all repayments (admin)
   getAll: () => api.get('/repayments'),
 };
+
+
 
 export default api;

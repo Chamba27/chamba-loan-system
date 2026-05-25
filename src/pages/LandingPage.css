@@ -1,0 +1,352 @@
+/* ── LANDING PAGE GLOBAL ─────────────────────────────────── */
+.landing-page {
+  background-color: #FCFFD4;
+  min-height: 100vh;
+}
+
+/* ── HERO SECTION ────────────────────────────────────────── */
+.hero-section {
+  background-color: #FCFFD4;
+  min-height: 100vh;
+  padding-top: 120px;
+  padding-bottom: 64px;
+}
+
+.hero-shell {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+/* ── HERO LEFT COPY ──────────────────────────────────────── */
+.hero-copy {
+  flex: 1;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #E4F222;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.hero-copy h1 {
+  font-family: 'Radio Canada', sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  color: #000;
+}
+
+.hero-copy h1 span {
+  display: block;
+  color: #000;
+}
+
+.hero-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 32px;
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+/* ── HERO SUBSCRIBE FORM ─────────────────────────────────── */
+.hero-subscribe {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  max-width: 420px;
+}
+
+.hero-subscribe input {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 999px;
+  border: 1.5px solid #ddd;
+  font-size: 14px;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  background-color: #fff;
+}
+
+.hero-subscribe input:focus {
+  border-color: #000;
+}
+
+.hero-subscribe button {
+  padding: 12px 24px;
+  border-radius: 999px;
+  background-color: #000;
+  color: #E4F222;
+  font-weight: 700;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  white-space: nowrap;
+}
+
+.hero-serving {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 28px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── HERO CTA BUTTONS ────────────────────────────────────── */
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.primary-pill {
+  padding: 14px 32px;
+  border-radius: 999px;
+  background-color: #E4F222;
+  color: #000;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  font-family: 'DM Sans', sans-serif;
+  border: 2px solid #000;
+  text-transform: uppercase;
+}
+
+.primary-pill:hover {
+  background-color: #d4e000;
+}
+
+.video-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  text-transform: uppercase;
+}
+
+.play-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-icon::after {
+  content: '▶';
+  font-size: 14px;
+}
+
+/* ── HERO ART ────────────────────────────────────────────── */
+.hero-art {
+  flex: 1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-photo-frame {
+  width: 100%;
+  max-width: 440px;
+  height: 480px;
+  border-radius: 24px;
+  overflow: hidden;
+  background-color: #e0e0e0;
+}
+
+.hero-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── BALANCE CARD ────────────────────────────────────────── */
+.balance-card {
+  position: absolute;
+  bottom: 24px;
+  left: -20px;
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  min-width: 200px;
+}
+
+.balance-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #888;
+  font-family: 'DM Sans', sans-serif;
+  margin-bottom: 4px;
+}
+
+.balance-card strong {
+  font-size: 20px;
+  font-weight: 900;
+  font-family: 'Radio Canada', sans-serif;
+  color: #000;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.card-label {
+  font-size: 11px;
+  color: #888;
+  font-family: 'DM Sans', sans-serif;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #888;
+}
+
+.mastercard-mark {
+  display: flex;
+}
+
+.mastercard-mark i:first-child {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #EB001B;
+  display: block;
+}
+
+.mastercard-mark i:last-child {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #FF5F00;
+  margin-left: -8px;
+  display: block;
+  opacity: 0.9;
+}
+
+/* ── HOW IT WORKS ────────────────────────────────────────── */
+.how-section {
+  background-color: #fff;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.how-section h2 {
+  font-family: 'Radio Canada', sans-serif;
+  font-size: 40px;
+  font-weight: 900;
+  margin-bottom: 48px;
+  color: #000;
+}
+
+.how-grid {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.how-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.how-icon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 40px;
+}
+
+.how-card h3 {
+  font-family: 'Radio Canada', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #000;
+}
+
+.how-card p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #888;
+  max-width: 220px;
+}
+
+/* ── MINI ILLUSTRATIONS ──────────────────────────────────── */
+.mini-illustration {
+  font-size: 48px;
+}
+
+.mini-illustration.create::after {
+  content: '👤';
+}
+
+.mini-illustration.apply::after {
+  content: '✅';
+}
+
+.mini-illustration.money::after {
+  content: '💰';
+}
+
+/* ── MOBILE RESPONSIVE ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero-shell {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .hero-copy h1 {
+    font-size: 38px;
+  }
+
+  .hero-art {
+    width: 100%;
+  }
+
+  .hero-photo-frame {
+    height: 320px;
+  }
+
+  .balance-card {
+    left: 0;
+    bottom: -16px;
+  }
+
+  .how-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}

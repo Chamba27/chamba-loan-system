@@ -27,7 +27,7 @@ const Sidebar = () => {
     <div style={{
       width: '240px',
       minHeight: '100vh',
-      backgroundColor: '#5a5a5a',
+      backgroundColor: '#181616',
       display: 'flex',
       flexDirection: 'column',
       padding: '24px 16px',
@@ -37,16 +37,33 @@ const Sidebar = () => {
       bottom: 0,
     }}>
 
+     
       {/* Logo */}
       <div style={{
         padding: '0 12px',
         marginBottom: '40px',
+        display: 'flex',
+        alignItems: 'center',
       }}>
-        <Link to="/" style={{ textDecoration: 'none' }}>
+        <Link to="/" style={{ 
+          textDecoration: 'none', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '10px' 
+        }}>
+          <img
+            src="/src/assets/logo.png"
+            alt="Chamba Logo"
+            style={{
+              height: '28px',
+              width: 'auto',
+              filter: 'brightness(0) invert(1)',
+            }}
+          />
           <span style={{
             fontFamily: 'Radio Canada',
             fontWeight: '900',
-            fontSize: '22px',
+            fontSize: '20px',
             color: '#E4F222',
           }}>
             CHAMBA
